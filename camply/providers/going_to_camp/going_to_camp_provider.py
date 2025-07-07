@@ -424,9 +424,22 @@ class GoingToCamp(BaseProvider):
         -------
         Tuple[dict, CampgroundFacility]
         """
-        self.campground_details[facility.resource_location_id]
+
+        # Try to find the campground details for this facility
+        facility_key = facility.resource_location_id
+        
+        if facility_key not in self.campground_details:
+            logger.warning(
+                f"Campground details not found for facility {facility_key} "
+                f"(name: {facility.resource_location_name}). "
+                f"Available keys: {list(self.campground_details.keys())}"
+            )
+            return facility, None
+        
+        campground_detail = self.campground_details[facility_key]
+        
         facility.id = _fetch_nested_key(
-            self.campground_details, facility.resource_location_id, "mapId"
+            campground_detail, "mapId"
         )
         if facility.region_name:
             formatted_recreation_area = (
